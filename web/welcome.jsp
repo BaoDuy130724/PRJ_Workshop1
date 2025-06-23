@@ -204,7 +204,7 @@
             <c:choose >
                 <c:when test="${not empty sessionScope.user}">
                     <div class="header">
-                        <h1>Welcome ${sessionScope.user.name}</h1>
+                        <h1>Welcome ${sessionScope.user.name} ${sessionScope.user.role}</h1>
                         <a class="logout" href="MainController?action=logout">Logout</a>
                     </div>
 
