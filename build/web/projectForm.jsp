@@ -120,16 +120,17 @@
                         <input type="hidden" name="action" value="createProject"/>
 
                         <label for="project_name">Project Name:</label>
-                        <input type="text" name="project_name" id="project_name" required="required"/>
+                        <input type="text" name="project_name" id="project_name"
+                               required="required" value="${requestScope.projectName!=null?requestScope.projectName : ''}"/>
 
                         <label for="description">Description:</label>
-                        <textarea id="description" name="description"></textarea>
+                        <textarea id="description" name="description">${requestScope.description}</textarea>
 
                         <label for="status">Status:</label>
                         <c:if test="${not empty requestScope.listStatus}">
                             <select id="status" name="status" required="required">
                                 <c:forEach var="s" items="${requestScope.listStatus}">
-                                    <option value="${s}">${s}</option>
+                                    <option value="${s}" ${s eq requestScope.statusSelected ? 'selected':''}>${s}</option>
                                 </c:forEach>
                             </select>
                         </c:if>

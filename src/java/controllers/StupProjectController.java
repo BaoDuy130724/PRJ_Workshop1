@@ -129,21 +129,24 @@ public class StupProjectController extends HttpServlet {
     private String handleProjectCreating(HttpServletRequest request, HttpServletResponse response) {
         try {
             String projectName = request.getParameter("project_name");
-            String description = request.getParameter("description");
+            String description = request.getParameter("description");   
             String status = request.getParameter("status");
             String estimated_launch = request.getParameter("estimated_launch");
 
             if (projectName == null || projectName.isEmpty()
                     || status == null || status.isEmpty() || estimated_launch == null || estimated_launch.isEmpty()) {
                 request.setAttribute("errorMsg", "please fill all of information");
+                keepFormData(request, projectName, description, status, estimated_launch);
+                CommonUtils.pushListStatusProject(request);
                 return PROJECT_PAGE;
             }
             Date estimated_launch_date = new SimpleDateFormat("yyyy-MM-dd").parse(estimated_launch);
             Date today = new Date();
-            if(!estimated_launch_date.after(today)){
-                 request.setAttribute("errorMsg", "Estimated launch date must be in the future.");
-                 CommonUtils.pushListStatusProject(request);
-                 return PROJECT_PAGE;
+            if (estimated_launch_date.before(today)) {
+                request.setAttribute("errorMsg", "Estimated launch date must be in the future.");
+                CommonUtils.pushListStatusProject(request);
+                keepFormData(request, projectName, description, status, estimated_launch);
+                return PROJECT_PAGE;
             }
             StartupProjectDTO newProject = new StartupProjectDTO(projectName, description, status, estimated_launch_date);
             boolean created = spdao.addProject(newProject);
@@ -153,6 +156,7 @@ public class StupProjectController extends HttpServlet {
                 return WELCOME_PAGE;
             } else {
                 CommonUtils.pushListStatusProject(request);
+                keepFormData(request, projectName, description, status, estimated_launch);
                 request.setAttribute("errorMsg", "Failed to create new project.");
             }
         } catch (Exception e) {
@@ -164,6 +168,7 @@ public class StupProjectController extends HttpServlet {
     private String handleProjectStatusUpdating(HttpServletRequest request, HttpServletResponse response) {
         if (!CommonUtils.isFounder(request)) {
             CommonUtils.getAccessDeniedMessage(request, "You don't have permission to update project status.");
+            CommonUtils.prepareProjectPageData(request);
             return WELCOME_PAGE;
         }
         try {
@@ -181,5 +186,14 @@ public class StupProjectController extends HttpServlet {
         }
         CommonUtils.prepareProjectPageData(request);
         return WELCOME_PAGE;
+    }
+
+    private void keepFormData(HttpServletRequest req,
+            String name, String desc,
+            String stt, String launch) {
+        req.setAttribute("projectName", name);
+        req.setAttribute("description", desc);
+        req.setAttribute("statusSelected", stt);
+        req.setAttribute("estimatedLaunch", launch);
     }
 }
